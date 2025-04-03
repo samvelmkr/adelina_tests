@@ -113,7 +113,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--format", choices=["xlsx", "csv"], default="csv", help="Выходной формат файла")
-    parser.add_argument("--start-id", type=int, default=1, help="Начальный ID для вопросов")
+    parser.add_argument("--start-id", type=int, default=0, help="Начальный ID для вопросов")
     parser.add_argument("--start-test-id", type=int, default=1, help="Начальный test_id")
     args = parser.parse_args()
 
@@ -129,6 +129,9 @@ def main():
     for json_file in json_files:
         print(f"🔄 Обрабатываю: {json_file}")
         data = process_json_file(json_file, row_id, test_id)
+        
+        # update start id for the next
+        row_id = data[-1][0]
 
         out_file_name = json_file.replace(".json", f".{args.format}")
         if args.format == "xlsx":
