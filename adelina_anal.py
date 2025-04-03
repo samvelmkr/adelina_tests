@@ -19,8 +19,8 @@ driver_path = os.path.join(root_dir, "geckodriver")
 service = Service(executable_path=driver_path)
 driver = webdriver.Firefox(service=service)
 
-username = "Альберт"
-password = "gustax-guvrof-Zipru8"
+username = "логин"
+password = "пароль"
 
 wait = WebDriverWait(driver, 15)
 
