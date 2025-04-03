@@ -15,15 +15,12 @@ resources_dir = os.path.join(root_dir, 'resources')
 os.makedirs(resources_dir, exist_ok=True)
 
 # Drivers path
-driver_path = "/home/samvel/adelina/geckodriver"
+driver_path = os.path.join(root_dir, "geckodriver")
 service = Service(executable_path=driver_path)
 driver = webdriver.Firefox(service=service)
 
 username = "Альберт"
 password = "gustax-guvrof-Zipru8"
-
-username = "lerochka0601"
-password = "qodzAq-fuvro4-nunwypi"
 
 wait = WebDriverWait(driver, 15)
 
