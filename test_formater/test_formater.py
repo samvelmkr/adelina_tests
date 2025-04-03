@@ -1,6 +1,10 @@
 import os
 import json
+import csv
+import argparse
+
 from openpyxl import Workbook
+
 
 HEADERS = [
     "id", "test_id", "interval_id", "number",
@@ -28,7 +32,7 @@ def append_to_file(entry, json_path, quiz_type: str):
     with open(json_path[:-5] + "-" + quiz_type + ".txt", "a") as extra_quiz_file:
         extra_quiz_file.write(str(entry) + "\n")
 
-def process_json_file(json_path):
+def process_json_file(json_path, start_id, test_id):
     """Читает NDJSON и формирует данные для Excel."""
     rows = []
    
@@ -74,12 +78,12 @@ def process_json_file(json_path):
                 answer_field = f'{", ".join(correct_answers)}'
 
             row = [
-                "", "", "", counter,  # id, test_id, interval_id, number (пустые)
+                counter + start_id, test_id, "", counter,  # id, test_id, interval_id, number (пустые)
                 quiz, "", test_type,  # Вопрос, пустой столбец, тип теста
                 formatted_answers, answer_field, "", ""  # Ответы, правильный ответ, пустые столбцы
             ]
             rows.append(row)
-            counter+=1
+            counter += 1
     
     return rows
 
@@ -95,7 +99,24 @@ def save_to_excel(filename, data):
     wb.save(filename)
     print(f"✅ Файл сохранен: {filename}")
 
+
+def save_to_csv(filename, data):
+
+    with open(filename, "w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(HEADERS)
+        writer.writerows(data)
+    print(f"✅ Файл сохранен: {filename}")
+
+
 def main():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--format", choices=["xlsx", "csv"], default="csv", help="Выходной формат файла")
+    parser.add_argument("--start-id", type=int, default=1, help="Начальный ID для вопросов")
+    parser.add_argument("--start-test-id", type=int, default=1, help="Начальный test_id")
+    args = parser.parse_args()
+
     """Обрабатывает все NDJSON-файлы в папке."""
     json_files = [f for f in os.listdir() if f.endswith(".json")]
 
@@ -103,11 +124,19 @@ def main():
         print("❌ Нет JSON-файлов в папке.")
         return
 
+    test_id = args.start_test_id
+    row_id = args.start_id
     for json_file in json_files:
         print(f"🔄 Обрабатываю: {json_file}")
-        excel_filename = json_file.replace(".json", ".xlsx")
-        data = process_json_file(json_file)
-        save_to_excel(excel_filename, data)
+        data = process_json_file(json_file, row_id, test_id)
+
+        out_file_name = json_file.replace(".json", f".{args.format}")
+        if args.format == "xlsx":
+            save_to_excel(out_file_name, data)
+        else:
+            save_to_csv(out_file_name, data)
+
+        test_id += 1
 
 if __name__ == "__main__":
     main()
